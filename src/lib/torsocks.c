@@ -266,6 +266,9 @@ static int setup_tor_connection(struct connection *conn)
 		goto error;
 	}
 
+	/* Print our IP:port source tuple. */
+	connection_print_source(conn);
+
 	ret = socks5_send_method(conn);
 	if (ret < 0) {
 		goto error;

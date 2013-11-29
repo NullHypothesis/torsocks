@@ -82,6 +82,47 @@ HT_GENERATE(connection_registry, connection, node, conn_hash_fct,
 		conn_equal_fct, 0.5, malloc, realloc, free);
 
 /*
+ * Print the source of a connection.
+ */
+ATTR_HIDDEN
+void connection_print_source(struct connection *conn)
+{
+	struct sockaddr_in *sin = NULL;
+	struct sockaddr_in6 *sin6 = NULL;
+	struct sockaddr_storage addr = { 0 };
+	uint16_t port = 0;
+	socklen_t addrlen = sizeof(addr);
+	sa_family_t family = AF_UNSPEC;
+	char ipbuf[INET6_ADDRSTRLEN] = { 0 };
+
+	if (getsockname(conn->fd, (struct sockaddr *) &addr, &addrlen) != 0) {
+		return;
+	}
+
+	family = ((struct sockaddr *) &addr)->sa_family;
+
+	if (family == AF_INET) {
+		sin = (struct sockaddr_in *) &addr;
+		if (inet_ntop(AF_INET, &(sin->sin_addr),
+				ipbuf, INET_ADDRSTRLEN) == NULL) {
+			return;
+		}
+		port = ntohs(sin->sin_port);
+	} else if (family == AF_INET6) {
+		sin6 = (struct sockaddr_in6 *) &addr;
+		if (inet_ntop(AF_INET6, &(sin6->sin6_addr),
+				ipbuf, INET6_ADDRSTRLEN) == NULL) {
+			return;
+		}
+		port = ntohs(sin6->sin6_port);
+	} else {
+		return;
+	}
+
+	DBG("Connection on fd %d originating from %s:%u", conn->fd, ipbuf, port);
+}
+
+/*
  * Acquire connection registry mutex.
  */
 ATTR_HIDDEN

@@ -88,4 +88,6 @@ void connection_registry_unlock(void);
 void connection_get_ref(struct connection *c);
 void connection_put_ref(struct connection *c);
 
+void connection_print_source(struct connection *conn);
+
 #endif /* TORSOCKS_CONNECTION_H */
